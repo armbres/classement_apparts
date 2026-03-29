@@ -11,24 +11,6 @@ npm start
 
 L'appli s'ouvre sur http://localhost:3000
 
-## Déployer sur Netlify
-
-### Option 1 : Depuis GitHub (recommandé)
-1. Pousse ce repo sur GitHub
-2. Va sur [app.netlify.com](https://app.netlify.com)
-3. Clique **"Add new site" → "Import an existing project"**
-4. Connecte ton repo GitHub
-5. Configure :
-   - **Build command** : `npm run build`
-   - **Publish directory** : `build`
-6. Clique **Deploy** — c'est tout !
-
-### Option 2 : Deploy manuel
-```bash
-npm run build
-```
-Puis glisse le dossier `build/` sur [app.netlify.com/drop](https://app.netlify.com/drop)
-
 ## Fonctionnalités
 
 - ✅ Ajouter des appartements avec détails (prix, surface, pièces, étage...)
