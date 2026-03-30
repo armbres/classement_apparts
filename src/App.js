@@ -1,12 +1,12 @@
 import React, { useState, useCallback } from "react";
-import { STORAGE_KEY, createEmptyApt } from "./config";
-import { useLocalStorage } from "./useLocalStorage";
+import { createEmptyApt } from "./config";
+import { useFirebase } from "./useFirebase";
 import ListView from "./ListView";
 import EditView from "./EditView";
 import RankingView from "./RankingView";
 
 export default function App() {
-  const [apartments, setApartments] = useLocalStorage(STORAGE_KEY, []);
+  const [apartments, setApartments, { loading, connected }] = useFirebase("apartments", []);
   const [activeTab, setActiveTab] = useState("list");
   const [editingId, setEditingId] = useState(null);
 
@@ -57,9 +57,20 @@ export default function App() {
             Armance et Fred cherchent un appart !!!!
           </div>
           <div style={{
-            fontSize: 13, color: "#a0b8a8", fontFamily: "'DM Mono', monospace", letterSpacing: "0.5px",
+            fontSize: 13, color: "#a0b8a8", fontFamily: "'DM Mono', monospace",
+            letterSpacing: "0.5px", display: "flex", alignItems: "center", gap: 8,
           }}>
-            {apartments.length} bien{apartments.length !== 1 ? "s" : ""} suivi{apartments.length !== 1 ? "s" : ""} · Barcelona 🏡
+            <span>
+              {apartments.length} bien{apartments.length !== 1 ? "s" : ""} suivi{apartments.length !== 1 ? "s" : ""} · Barcelona 🏡
+            </span>
+            <span style={{
+              display: "inline-block", width: 8, height: 8, borderRadius: "50%",
+              background: connected ? "#4a9e6e" : "#c45a3c",
+              boxShadow: connected ? "0 0 6px #4a9e6e80" : "none",
+            }} />
+            <span style={{ fontSize: 11, color: connected ? "#7ac09a" : "#e08070" }}>
+              {connected ? "synchro" : "hors ligne"}
+            </span>
           </div>
 
           <div style={{ display: "flex", gap: 0, marginTop: 20, borderBottom: "1px solid #3a5a48" }}>
@@ -77,24 +88,33 @@ export default function App() {
 
       {/* Content */}
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "24px 16px" }}>
-        {activeTab === "list" && (
-          <ListView
-            apartments={apartments}
-            onEdit={(id) => { setEditingId(id); setActiveTab("edit"); }}
-            onAdd={addApartment}
-            onReset={resetAll}
-          />
-        )}
-        {activeTab === "edit" && editingApt && (
-          <EditView
-            apt={editingApt}
-            onUpdate={updateApartment}
-            onDelete={deleteApartment}
-            onBack={() => setActiveTab("list")}
-          />
-        )}
-        {activeTab === "ranking" && (
-          <RankingView apartments={apartments} />
+        {loading ? (
+          <div style={{ textAlign: "center", padding: "60px 20px", color: "#a09a92" }}>
+            <div style={{ fontSize: 36, marginBottom: 16 }}>⏳</div>
+            <div style={{ fontSize: 14, fontFamily: "'DM Mono', monospace" }}>Chargement...</div>
+          </div>
+        ) : (
+          <>
+            {activeTab === "list" && (
+              <ListView
+                apartments={apartments}
+                onEdit={(id) => { setEditingId(id); setActiveTab("edit"); }}
+                onAdd={addApartment}
+                onReset={resetAll}
+              />
+            )}
+            {activeTab === "edit" && editingApt && (
+              <EditView
+                apt={editingApt}
+                onUpdate={updateApartment}
+                onDelete={deleteApartment}
+                onBack={() => setActiveTab("list")}
+              />
+            )}
+            {activeTab === "ranking" && (
+              <RankingView apartments={apartments} />
+            )}
+          </>
         )}
       </div>
     </div>
