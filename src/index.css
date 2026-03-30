@@ -1,0 +1,42 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "DM Sans", "Helvetica Neue", sans-serif;
+  background: #f5f8f5;
+  color: #1a3a2a;
+  -webkit-font-smoothing: antialiased;
+}
+
+input:focus,
+textarea:focus {
+  border-color: #2e8b57 !important;
+  outline: none;
+}
+
+button {
+  font-family: "DM Sans", sans-serif;
+}
+
+::selection {
+  background: #2e8b5740;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #c4c0ba;
+  border-radius: 3px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
