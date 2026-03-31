@@ -73,7 +73,6 @@ export function useFirebase(path, initialValue) {
       }
     );
     return () => unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path]);
 
   // Write to Firebase
