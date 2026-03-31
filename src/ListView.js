@@ -37,10 +37,17 @@ export default function ListView({ apartments, onEdit, onAdd, onReset }) {
               background: "#fff", borderRadius: 12, padding: "18px 20px", border: "1px solid #ece9e4",
               cursor: "pointer", transition: "all 0.2s", display: "flex", alignItems: "center", gap: 16,
             }}>
-              <div style={{
-                width: 44, height: 44, borderRadius: 10, background: `${getColor(i)}18`,
-                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0,
-              }}>{apt.favorite ? "❤️" : (apt.emoji || "🏠")}</div>
+              {apt.photos && apt.photos.length > 0 ? (
+                <img src={apt.photos[0]} alt="" style={{
+                  width: 44, height: 44, borderRadius: 10, objectFit: "cover",
+                  flexShrink: 0, background: "#ece9e4",
+                }} onError={(e) => { e.target.style.display = "none"; }} />
+              ) : (
+                <div style={{
+                  width: 44, height: 44, borderRadius: 10, background: `${getColor(i)}18`,
+                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0,
+                }}>{apt.favorite ? "❤️" : (apt.emoji || "🏠")}</div>
+              )}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
                   fontWeight: 600, fontSize: 15, marginBottom: 3,
