@@ -41,8 +41,13 @@ export default function RankingView({ apartments }) {
               }}>{i + 1}</div>
 
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 600, fontSize: 15 }}>
-                  {apt.favorite && "❤️ "}{apt.name || "Sans nom"}
+                <div style={{ fontWeight: 600, fontSize: 15, display: "flex", alignItems: "center", gap: 6 }}>
+                  {apt.favorite ? "❤️ " : apt.emoji ? `${apt.emoji} ` : ""}{apt.name || "Sans nom"}
+                  {apt.link && (
+                    <a href={apt.link} target="_blank" rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ fontSize: 12, color: "#4a9e6e", textDecoration: "none" }}>🔗</a>
+                  )}
                 </div>
                 <div style={{ fontSize: 12, color: "#8a8680", fontFamily: "'DM Mono', monospace", display: "flex", gap: 12, flexWrap: "wrap" }}>
                   {apt.price && <span>{Number(apt.price).toLocaleString("fr-FR")} €</span>}
