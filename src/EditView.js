@@ -1,9 +1,15 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { CRITERIA } from "./config";
 import { ScoreButton, Card, SectionTitle } from "./components";
 
+const EMOJI_SUGGESTIONS = [
+  "🏠", "🏡", "🏢", "🌇", "☀️", "🌙", "🎨", "🧱",
+  "🐱", "🌳", "🍋", "🔑", "✨", "🔥", "💎", "🦋",
+];
+
 export default function EditView({ apt, onUpdate, onDelete, onBack }) {
   const inputRef = useRef(null);
+  const [showEmojiHelper, setShowEmojiHelper] = useState(false);
   useEffect(() => { inputRef.current?.focus(); }, [apt.id]);
 
   const update = (updates) => onUpdate(apt.id, updates);
@@ -14,9 +20,23 @@ export default function EditView({ apt, onUpdate, onDelete, onBack }) {
     update({ scores: ns });
   };
 
+  const addPhoto = () => {
+    const url = window.prompt("Collez l'URL de la photo :");
+    if (url && url.trim()) {
+      const photos = apt.photos ? [...apt.photos, url.trim()] : [url.trim()];
+      update({ photos });
+    }
+  };
+
+  const removePhoto = (index) => {
+    const photos = (apt.photos || []).filter((_, i) => i !== index);
+    update({ photos });
+  };
+
   const fields = [
     { key: "name", label: "Nom / Référence", placeholder: "ex. Ferlandina 53", span: 2 },
     { key: "address", label: "Adresse", placeholder: "Adresse complète", span: 2 },
+    { key: "link", label: "🔗 Lien annonce", placeholder: "https://idealista.com/...", span: 2, type: "url" },
     { key: "price", label: "Prix (€)", placeholder: "229900", type: "number" },
     { key: "sqm", label: "Surface (m²)", placeholder: "65", type: "number" },
     { key: "rooms", label: "Pièces", placeholder: "3", type: "number" },
@@ -34,8 +54,77 @@ export default function EditView({ apt, onUpdate, onDelete, onBack }) {
       {/* Infos */}
       <Card>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 8 }}>
-          <SectionTitle>Détails du bien</SectionTitle>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            {/* Emoji picker */}
+            <div style={{ position: "relative" }}>
+              <button onClick={() => setShowEmojiHelper(!showEmojiHelper)} style={{
+                width: 48, height: 48, borderRadius: 12, border: "2px dashed #d0dcd4",
+                background: "#f0f5f2", fontSize: 24, cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                transition: "all 0.2s",
+              }}>
+                {apt.emoji || "🏠"}
+              </button>
+              {showEmojiHelper && (
+                <div style={{
+                  position: "absolute", top: 56, left: 0, zIndex: 100,
+                  background: "#fff", borderRadius: 12, padding: 16,
+                  border: "1px solid #ece9e4", boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+                  width: 260,
+                }}>
+                  <div style={{ fontSize: 12, color: "#8a8680", marginBottom: 8, fontFamily: "'DM Mono', monospace" }}>
+                    Tapez ou collez un emoji :
+                  </div>
+                  <input
+                    autoFocus
+                    value={apt.emoji || ""}
+                    onChange={(e) => {
+                      // Take only the last entered emoji character(s)
+                      const val = e.target.value;
+                      // Extract the last emoji (handles multi-codepoint)
+                      const segments = [...new Intl.Segmenter("fr", { granularity: "grapheme" }).segment(val)];
+                      const lastEmoji = segments.length > 0 ? segments[segments.length - 1].segment : "";
+                      update({ emoji: lastEmoji });
+                    }}
+                    placeholder="🏠"
+                    style={{
+                      width: "100%", padding: "10px", border: "1px solid #e2e0dc", borderRadius: 8,
+                      fontSize: 28, textAlign: "center", boxSizing: "border-box",
+                      background: "#faf9f7", marginBottom: 10,
+                    }}
+                  />
+                  <div style={{ fontSize: 11, color: "#b0aaa2", marginBottom: 8, fontFamily: "'DM Mono', monospace" }}>
+                    Ou choisissez :
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                    {EMOJI_SUGGESTIONS.map((e) => (
+                      <button key={e} onClick={() => { update({ emoji: e }); setShowEmojiHelper(false); }}
+                        style={{
+                          width: 34, height: 34, border: "none", borderRadius: 6,
+                          background: apt.emoji === e ? "#eef4f0" : "transparent",
+                          fontSize: 18, cursor: "pointer", display: "flex",
+                          alignItems: "center", justifyContent: "center",
+                        }}
+                      >{e}</button>
+                    ))}
+                  </div>
+                  <div style={{
+                    marginTop: 10, fontSize: 10, color: "#b0aaa2", fontFamily: "'DM Mono', monospace",
+                    borderTop: "1px solid #ece9e4", paddingTop: 8,
+                  }}>
+                    💡 Mac : Ctrl+Cmd+Espace · Win : Win+.
+                  </div>
+                  <button onClick={() => setShowEmojiHelper(false)} style={{
+                    marginTop: 8, width: "100%", padding: "6px", background: "#f0f5f2",
+                    border: "1px solid #d0dcd4", borderRadius: 6, fontSize: 12,
+                    cursor: "pointer", color: "#5a8a6e",
+                  }}>Fermer</button>
+                </div>
+              )}
+            </div>
+            <SectionTitle>Détails du bien</SectionTitle>
+          </div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button onClick={() => update({ favorite: !apt.favorite })} style={{
               background: apt.favorite ? "#c45a3c15" : "transparent",
               border: `1px solid ${apt.favorite ? "#c45a3c" : "#ddd8d0"}`,
@@ -74,6 +163,18 @@ export default function EditView({ apt, onUpdate, onDelete, onBack }) {
           ))}
         </div>
 
+        {/* Link button */}
+        {apt.link && (
+          <a href={apt.link} target="_blank" rel="noopener noreferrer" style={{
+            display: "inline-flex", alignItems: "center", gap: 6, marginTop: 12,
+            padding: "8px 16px", background: "#eef4f0", borderRadius: 8,
+            color: "#2e8b57", fontSize: 13, fontWeight: 600, textDecoration: "none",
+            border: "1px solid #c4d8ca", transition: "all 0.2s",
+          }}>
+            🔗 Voir l'annonce
+          </a>
+        )}
+
         {apt.price && apt.sqm && (
           <div style={{
             marginTop: 12, padding: "10px 14px", background: "#eef4f0", borderRadius: 8,
@@ -82,6 +183,57 @@ export default function EditView({ apt, onUpdate, onDelete, onBack }) {
             {Math.round(apt.price / apt.sqm).toLocaleString("fr-FR")} € / m²
           </div>
         )}
+      </Card>
+
+      {/* Photos */}
+      <Card>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <SectionTitle>Photos</SectionTitle>
+          <button onClick={addPhoto} style={{
+            padding: "6px 14px", background: "#1a3a2a", color: "#f8f6f2", border: "none",
+            borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer",
+          }}>+ Ajouter une photo</button>
+        </div>
+
+        {(!apt.photos || apt.photos.length === 0) && (
+          <div style={{
+            padding: "24px", textAlign: "center", color: "#b0aaa2", fontSize: 13,
+            border: "2px dashed #e2e0dc", borderRadius: 10,
+          }}>
+            📷 Aucune photo — ajoutez des URLs d'images
+          </div>
+        )}
+
+        {apt.photos && apt.photos.length > 0 && (
+          <div style={{
+            display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+            gap: 10,
+          }}>
+            {apt.photos.map((url, i) => (
+              <div key={i} style={{ position: "relative", borderRadius: 10, overflow: "hidden" }}>
+                <img
+                  src={url} alt={`Photo ${i + 1}`}
+                  style={{
+                    width: "100%", height: 120, objectFit: "cover",
+                    borderRadius: 10, display: "block", background: "#ece9e4",
+                  }}
+                  onError={(e) => { e.target.style.display = "none"; }}
+                />
+                <button onClick={() => removePhoto(i)} style={{
+                  position: "absolute", top: 4, right: 4,
+                  width: 24, height: 24, borderRadius: "50%",
+                  background: "rgba(0,0,0,0.5)", color: "#fff", border: "none",
+                  fontSize: 12, cursor: "pointer", display: "flex",
+                  alignItems: "center", justifyContent: "center",
+                }}>✕</button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div style={{ marginTop: 10, fontSize: 11, color: "#b0aaa2", fontFamily: "'DM Mono', monospace" }}>
+          Astuce : copiez l'URL d'une image depuis Idealista, Fotocasa, etc.
+        </div>
       </Card>
 
       {/* Notation */}

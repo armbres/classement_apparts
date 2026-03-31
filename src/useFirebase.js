@@ -39,6 +39,9 @@ function sanitizeApartments(data) {
     favorite: apt.favorite || false,
     visited: apt.visited || false,
     visitDate: apt.visitDate || "",
+    emoji: apt.emoji || "",
+    link: apt.link || "",
+    photos: Array.isArray(apt.photos) ? apt.photos.filter(Boolean) : [],
   }));
 }
 
