@@ -40,7 +40,7 @@ export default function ListView({ apartments, onEdit, onAdd, onReset }) {
               <div style={{
                 width: 44, height: 44, borderRadius: 10, background: `${getColor(i)}18`,
                 display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0,
-              }}>{apt.favorite ? "❤️" : "🏠"}</div>
+              }}>{apt.favorite ? "❤️" : (apt.emoji || "🏠")}</div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
                   fontWeight: 600, fontSize: 15, marginBottom: 3,
