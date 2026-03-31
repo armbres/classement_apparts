@@ -31,6 +31,7 @@ export const createEmptyApt = () => ({
 });
 
 export function computeWeightedScore(apt) {
+  if (!apt || !apt.scores) return 0;
   let total = 0;
   let maxTotal = 0;
   CRITERIA.forEach((c) => {
