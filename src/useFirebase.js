@@ -5,21 +5,41 @@ import { db, ref, onValue, set } from "./firebase";
 // This converts them back to arrays when needed.
 function firebaseToArray(data) {
   if (data === null || data === undefined) return null;
-  if (Array.isArray(data)) return data;
+  if (Array.isArray(data)) return data.filter(Boolean);
   if (typeof data === "object") {
     const keys = Object.keys(data);
-    // Check if it looks like a Firebase-converted array (numeric keys)
     const isNumeric = keys.length > 0 && keys.every((k) => /^\d+$/.test(k));
     if (isNumeric) {
       const arr = [];
       keys.forEach((k) => {
         arr[parseInt(k, 10)] = data[k];
       });
-      // Remove any undefined holes
-      return arr.filter((item) => item !== undefined && item !== null);
+      return arr.filter(Boolean);
     }
   }
   return data;
+}
+
+// Firebase strips empty objects like scores: {}.
+// Ensure every apartment has all required fields.
+function sanitizeApartments(data) {
+  if (!Array.isArray(data)) return [];
+  return data.filter(Boolean).map((apt) => ({
+    id: apt.id || Date.now() + Math.random(),
+    name: apt.name || "",
+    address: apt.address || "",
+    price: apt.price || "",
+    sqm: apt.sqm || "",
+    rooms: apt.rooms || "",
+    floor: apt.floor || "",
+    notes: apt.notes || "",
+    pros: apt.pros || "",
+    cons: apt.cons || "",
+    scores: apt.scores && typeof apt.scores === "object" ? apt.scores : {},
+    favorite: apt.favorite || false,
+    visited: apt.visited || false,
+    visitDate: apt.visitDate || "",
+  }));
 }
 
 export function useFirebase(path, initialValue) {
@@ -49,8 +69,10 @@ export function useFirebase(path, initialValue) {
         }
         try {
           const raw = snapshot.val();
-          const data =
+          const converted =
             Array.isArray(initialValue) ? firebaseToArray(raw) : raw;
+          const data =
+            Array.isArray(initialValue) ? sanitizeApartments(converted) : converted;
           setValue(data !== null && data !== undefined ? data : initialValue);
           setConnected(true);
         } catch (err) {
